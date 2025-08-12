@@ -1,0 +1,14 @@
+POST http://localhost:5533/courses
+   Content-Type: application/json
+
+{
+    "tittle": "Curso de Node.js"
+}
+
+###
+
+GET http://localhost:5533/courses
+
+###
+
+GET http://localhost:5533/courses/a5c0a93d-f4db-4f97-a625-b6b7e83150a0

@@ -1,34 +1,61 @@
 import fastify from 'fastify'
 import crypto from 'node:crypto'
 
-const server = fastify()
+const server = fastify({
+    logger: {transport: {
+      target: 'pino-pretty',
+      options: {
+        translateTime: 'HH:MM:ss Z',
+        ignore: 'pid,hostname',
+      },
+    }}
+})
 
 const courses = [
-    {id: 1, tile: 'Curso de node.js'},
-    {id: 2, tile: 'Curso de React'},
-    {id: 3, tile: 'Curso de Java'},
+    {id: '1', tittle: 'Curso de React' },
+    {id: '2', tittle: 'Curso de Java' },
+    {id: '3', tittle: 'Curso de Html' },
 ]
 
 server.get('/courses', () => {
-    return {courses}
-})
+    return { courses }
+});
 
 server.get('/courses/:id', (request, reply) => {
-    const courseId = request.params.id
-    const course = courses.find(course => course.id === courseId)
+type Params = {
+    id:string
+}
+    const params = request.params as Params
+    const courseID = params.id
 
-    if (course) {
-        return {course}
-    }
+    const course = courses.find(course => course.id === courseID)
+
+    if(course) {
+        return { course }
+    } 
+
+    return reply.status(404).send()
 })
 
-server.post('/courses', () => {
-    const coursesId = crypto.randomUUID()
-    const courseTitle = request.body.tittle
+server.post('/courses', (request, reply) => {
 
-    if(!courseTitle) {
-     return reply.status(404).send()   
+    type Body = {
+        tittle: string
     }
 
-    courses.push({id: crypto.randomUUID(), title: 'NOVO curso'})
+    const courseId = crypto.randomUUID()
+    const body = request.body as Body
+    const courseTittle = body.tittle
+
+    if (!courseTittle) {
+        return reply.status(400).send({ message: 'Titulo Obrigatório' })
+    }
+
+    courses.push({id: courseId, tittle: courseTittle})
+
+    return reply.status(201).send({ courseId })
+})
+
+server.listen({ port: 5533}).then(() => {
+    console.log('HTTP conectado na porta:5533');
 })
